@@ -1,0 +1,80 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91b6f069ebd4042ea904c844b7fb30c7, type: 3}
+  m_Name: BossTuning
+  m_EditorClassIdentifier: TypingMe.Runtime::TypingMe.Data.BossTuningSO
+  healthFromWordLength: 1.2
+  sigilDamageMultiplier: 1.5
+  sigilTargetCoverage: 0.45
+  enrageThreshold: 0.3
+  enrageIntervalScale: 0.6
+  profiles:
+  - rank: 0
+    attackInterval: 28
+    firstAttackDelay: 15
+    telegraph: 1.4
+    doubleAttacks: 0
+    burstWords: 2
+    surgeMultiplier: 1.2
+    surgeDuration: 3
+    veilWords: 2
+    veilDuration: 2.5
+    healthMultiplier: 0.95
+    attacks: 00000000
+  - rank: 1
+    attackInterval: 22
+    firstAttackDelay: 13
+    telegraph: 1.4
+    doubleAttacks: 0
+    burstWords: 2
+    surgeMultiplier: 1.28
+    surgeDuration: 3.5
+    veilWords: 2
+    veilDuration: 2.5
+    healthMultiplier: 1.02
+    attacks: 0000000001000000
+  - rank: 2
+    attackInterval: 17
+    firstAttackDelay: 12
+    telegraph: 1.4
+    doubleAttacks: 0
+    burstWords: 3
+    surgeMultiplier: 1.34
+    surgeDuration: 4
+    veilWords: 2
+    veilDuration: 2.2
+    healthMultiplier: 1.08
+    attacks: 000000000100000002000000
+  - rank: 3
+    attackInterval: 13.5
+    firstAttackDelay: 11
+    telegraph: 1.4
+    doubleAttacks: 1
+    burstWords: 3
+    surgeMultiplier: 1.4
+    surgeDuration: 4.5
+    veilWords: 3
+    veilDuration: 2.6
+    healthMultiplier: 1.15
+    attacks: 000000000100000002000000
+  - rank: 4
+    attackInterval: 10
+    firstAttackDelay: 8
+    telegraph: 1.25
+    doubleAttacks: 1
+    burstWords: 4
+    surgeMultiplier: 1.5
+    surgeDuration: 5
+    veilWords: 3
+    veilDuration: 2.8
+    healthMultiplier: 1.45
+    attacks: 000000000100000002000000

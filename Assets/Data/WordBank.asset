@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52c045ead70154f40ab7075bb72c4fe8, type: 3}
+  m_Name: WordBank
+  m_EditorClassIdentifier: TypingMe.Runtime::TypingMe.Data.WordBankSO
+  sourceList: {fileID: 4900000, guid: bffb7bb302e314894af3abeef17340fa, type: 3}
+  rankingMode: 0
+  tiers:
+  - tier: 0
+    minRank: 1
+    maxRank: 1000
+    minLength: 3
+    maxLength: 5
+  - tier: 1
+    minRank: 1001
+    maxRank: 5000
+    minLength: 5
+    maxLength: 7
+  - tier: 2
+    minRank: 5001
+    maxRank: 2147483647
+    minLength: 7
+    maxLength: 24
