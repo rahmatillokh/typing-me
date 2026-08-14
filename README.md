@@ -80,11 +80,18 @@ Grab the latest build from **[Releases](../../releases/latest)**.
 
 1. Download **`TypingMe-macOS.zip`**.
 2. Double-click the zip; drag **`TypingMe.app`** wherever you like (e.g. Applications).
-3. First launch (the build is unsigned): **right-click the app → Open → Open**.
-   If macOS still refuses, clear the quarantine flag once:
+3. First launch: macOS will say it *"could not verify TypingMe is free of malware"* — that's
+   Gatekeeper flagging an **unsigned indie build**, not actual malware. Click **Done** (not
+   "Move to Trash"), then:
+
+   **System Settings → Privacy & Security** → scroll down to *"TypingMe was blocked…"* →
+   **Open Anyway** → **Open**. One time only — after that it launches normally.
+
+   On older macOS (13/14) **right-click the app → Open → Open** also works. Terminal
+   alternative for any version — clear the download-quarantine flag once:
 
    ```bash
-   xattr -cr /path/to/TypingMe.app
+   xattr -cr /Applications/TypingMe.app
    ```
 
 No installer, no account, no internet needed — the game is fully offline. Progress saves
