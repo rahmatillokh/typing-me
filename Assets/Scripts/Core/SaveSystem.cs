@@ -26,9 +26,15 @@ namespace TypingMe.Core
     /// JSON save in <see cref="Application.persistentDataPath"/>. Written on level-complete and on
     /// volume change (§9). Writes go through a temp file so a crash mid-write cannot corrupt progress.
     /// </summary>
+    /// <remarks>
+    /// On WebGL the same JSON goes through <see cref="PlayerPrefs"/> instead of the file system:
+    /// the browser build has no real disk, and PlayerPrefs is the one store Unity reliably persists
+    /// to IndexedDB without any manual file-system syncing.
+    /// </remarks>
     public static class SaveSystem
     {
         private const string FileName = "typingme.save.json";
+        private const string PrefsKey = "typingme.save";
 
         private static SaveData _cache;
 
@@ -50,15 +56,10 @@ namespace TypingMe.Core
         {
             try
             {
-                if (File.Exists(SavePath))
-                {
-                    string json = File.ReadAllText(SavePath);
-                    _cache = JsonUtility.FromJson<SaveData>(json) ?? new SaveData();
-                }
-                else
-                {
-                    _cache = new SaveData();
-                }
+                string json = ReadRaw();
+                _cache = string.IsNullOrEmpty(json)
+                    ? new SaveData()
+                    : JsonUtility.FromJson<SaveData>(json) ?? new SaveData();
             }
             catch (Exception e)
             {
@@ -77,16 +78,7 @@ namespace TypingMe.Core
 
             try
             {
-                string json = JsonUtility.ToJson(_cache, true);
-                string temp = SavePath + ".tmp";
-
-                File.WriteAllText(temp, json);
-
-                if (File.Exists(SavePath))
-                    File.Replace(temp, SavePath, SavePath + ".bak");
-                else
-                    File.Move(temp, SavePath);
-
+                WriteRaw(JsonUtility.ToJson(_cache, true));
                 Changed?.Invoke(_cache);
             }
             catch (Exception e)
@@ -94,6 +86,30 @@ namespace TypingMe.Core
                 Debug.LogError($"[SaveSystem] Failed to write save: {e.Message}");
             }
         }
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+        private static string ReadRaw() => PlayerPrefs.GetString(PrefsKey, string.Empty);
+
+        private static void WriteRaw(string json)
+        {
+            PlayerPrefs.SetString(PrefsKey, json);
+            PlayerPrefs.Save();
+        }
+#else
+        private static string ReadRaw() => File.Exists(SavePath) ? File.ReadAllText(SavePath) : null;
+
+        private static void WriteRaw(string json)
+        {
+            string temp = SavePath + ".tmp";
+
+            File.WriteAllText(temp, json);
+
+            if (File.Exists(SavePath))
+                File.Replace(temp, SavePath, SavePath + ".bak");
+            else
+                File.Move(temp, SavePath);
+        }
+#endif
 
         /// <summary>Backs the "reset progress" action in Settings (§7).</summary>
         public static void ResetProgress()

@@ -751,7 +751,23 @@ namespace TypingMe.EditorTools
             PlayerSettings.defaultScreenHeight = 1080;
             PlayerSettings.runInBackground = false;
 
+            ConfigureWebGL();
             ConfigureAppIcon();
+        }
+
+        /// <summary>
+        /// Browser build settings. The project ships its own page (Assets/WebGLTemplates/TypingMe)
+        /// so the game fills the window behind a branded loader, and gzip *with* the decompression
+        /// fallback so the build runs on static hosts — GitHub Pages included — that never set a
+        /// Content-Encoding header.
+        /// </summary>
+        private static void ConfigureWebGL()
+        {
+            PlayerSettings.WebGL.template = "PROJECT:TypingMe";
+            PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Gzip;
+            PlayerSettings.WebGL.decompressionFallback = true;
+            PlayerSettings.WebGL.dataCaching = true;
+            PlayerSettings.WebGL.nameFilesAsHashes = false;
         }
 
         /// <summary>

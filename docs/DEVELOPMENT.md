@@ -37,8 +37,8 @@ run — duration, why it ended, decoded frame count, and the measured brightness
 
 ### Building and running a player
 
-Both standalone targets build from this machine — **Typing Me → Build → macOS / Windows x64**, or
-headless:
+All three targets build from this machine — **Typing Me → Build → macOS / Windows x64 / WebGL**,
+or headless:
 
 ```bash
 /Applications/Unity/Hub/Editor/6000.5.8f1/Unity.app/Contents/MacOS/Unity -batchmode -quit -projectPath /Users/imac/Developer/typer -executeMethod TypingMe.EditorTools.BuildTools.BuildMac -logFile /tmp/build.log
@@ -49,15 +49,55 @@ headless:
 ```
 
 ```bash
-open /Users/imac/Developer/typer/Builds/macOS/TypingMe.app
+/Applications/Unity/Hub/Editor/6000.5.8f1/Unity.app/Contents/MacOS/Unity -batchmode -quit -projectPath /Users/imac/Developer/typer -executeMethod TypingMe.EditorTools.BuildTools.BuildWebGL -logFile /tmp/build-webgl.log
 ```
 
-Outputs land in `Builds/macOS/TypingMe.app` and `Builds/Windows/` (the whole folder is the game —
-`TypingMe.exe` plus its `_Data` folder and `UnityPlayer.dll`; zip the folder, not just the exe).
+```bash
+open /Users/imac/Developer/typer/Builds.noindex/macOS/TypingMe.app
+```
+
+Outputs land under `Builds.noindex/` (the suffix keeps Spotlight from indexing hundreds of MB of
+player binaries): `macOS/TypingMe.app`, `Windows/` (the whole folder is the game — `TypingMe.exe`
+plus its `_Data` folder and `UnityPlayer.dll`; zip the folder, not just the exe), and `WebGL/` (a
+static site, see below). Release zips are packaged into `Builds.noindex/Release/`.
 
 The Windows player uses the **Mono** scripting backend, because IL2CPP for Windows cannot
-cross-compile from macOS. Switching targets triggers a full platform reimport, so the first Windows
-build after a macOS one (and vice versa) takes minutes; later ones are quick.
+cross-compile from macOS. Switching targets triggers a full platform reimport, so the first build
+after switching platform takes minutes; later ones are quick.
+
+### The web build
+
+`Typing Me → Build → WebGL` produces `Builds.noindex/WebGL/` — `index.html`, `Build/`,
+`TemplateData/` — ready to host on any static server. Publish it to GitHub Pages with:
+
+```bash
+docs/tools/deploy-webgl.sh
+```
+
+That copies the folder onto the `gh-pages` branch (created on first run), adds `.nojekyll` and
+force-pushes; the game is then live at **https://rahmatillokh.github.io/typing-me/**.
+
+What makes the browser build work, all of it guarded by `UNITY_WEBGL && !UNITY_EDITOR`:
+
+- **Page template** — `Assets/WebGLTemplates/TypingMe/` (selected by `PlayerSettings.WebGL.template =
+  "PROJECT:TypingMe"` in the bootstrap): the canvas fills the window behind a branded loader in
+  the app-icon palette, keyboard focus is handed to the canvas, there is a fullscreen button, a
+  desktop-only notice for touch devices, and Open Graph tags so a shared link unfurls with the
+  gameplay screenshot. `docs/tools/make_web_assets.py` regenerates the favicon and that preview
+  card from the icon and screenshots.
+- **Compression** — gzip *with* `decompressionFallback`, so the loader decompresses in JS on hosts
+  like GitHub Pages that never set `Content-Encoding`. Brotli would be smaller but needs a
+  configured server.
+- **Saves** — `SaveSystem` swaps the file for a `PlayerPrefs` string (IndexedDB-backed); the file
+  path and `File.Replace` dance have no disk to live on in a browser.
+- **Splash** — WebGL's `VideoPlayer` only streams from URLs, so an imported `VideoClip` never
+  prepares. `SplashController` goes straight to the menu instead of waiting out its 12s deadline.
+- **Audio** — `AudioListener.GetOutputData` / `AudioClip.GetData` are unavailable, so the boot-time
+  audibility report is skipped. The procedural clips themselves (`AudioClip.Create` + `SetData`)
+  work; the browser keeps the mix muted until the first click or keypress, which Unity's loader
+  handles.
+- **Pixel ratio** is capped at 1.5 in the template — bloom at full Retina resolution is more GPU
+  than a typing game deserves.
 
 Player log: `~/Library/Logs/DefaultCompany/Typing Me/Player.log`.
 Save file: `~/Library/Application Support/DefaultCompany/Typing Me/typingme.save.json`
@@ -364,7 +404,7 @@ machine early rather than at the end.
 | M3 — word bank, generator, 20-word levels, complete flow | Done |
 | M4 — Home/Settings nav, level select, Continue, save/load | Done |
 | M5 — URP Bloom, themes, TMP styling, motion polish | Done; bosses are authored pixel art, the rest is generated placeholder |
-| M6 — audio, juice, Windows build | Done — music, SFX and clear-burst VFX in; Windows x64 (Mono) builds from this machine |
+| M6 — audio, juice, Windows build | Done — music, SFX and clear-burst VFX in; Windows x64 (Mono), macOS and WebGL all build from this machine, and the web build is published on GitHub Pages |
 
 ### Before shipping
 

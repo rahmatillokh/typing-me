@@ -289,6 +289,12 @@ namespace TypingMe.Audio
         /// </remarks>
         private System.Collections.IEnumerator ReportAudioHealth()
         {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            // The browser backend exposes neither GetData nor GetOutputData, so there is nothing to
+            // measure — and the mix stays muted until the first click resumes the AudioContext anyway.
+            Debug.Log("[Audio] WebGL: output readback unavailable; audio starts on first user gesture.");
+            yield break;
+#else
             var clipSamples = new float[4096];
             AudioClip track = musicSource != null ? musicSource.clip : null;
             if (track != null) track.GetData(clipSamples, 0);
@@ -319,6 +325,7 @@ namespace TypingMe.Audio
                       $"playing={musicSource.isPlaying} volume={musicSource.volume:F2} " +
                       $"listener={(listener != null ? "yes" : "MISSING")} " +
                       $"clipPeak={clipPeak:F3} outputPeak={outputPeak:F3} focused={Application.isFocused}");
+#endif
         }
 
         /// <summary>Ducks the music under an end-of-run sting, then restores it.</summary>

@@ -3,10 +3,12 @@
 **A neon typing-action game.** Words rain from pixel-art bosses — type them before they hit the
 line. 80 levels, 4 seasons, 5 bosses, and a keyboard that turns into a weapon.
 
-![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20macOS-blue)
+[![Play in browser](https://img.shields.io/badge/%F0%9F%95%B9%20play%20now-in%20your%20browser-3bff9e?style=for-the-badge&labelColor=05070c)](https://rahmatillokh.github.io/typing-me/)
+
+![Platforms](https://img.shields.io/badge/platform-Browser%20%7C%20Windows%20%7C%20macOS-blue)
 ![Engine](https://img.shields.io/badge/engine-Unity%206-black)
 ![Tests](https://img.shields.io/badge/tests-46%20passing-brightgreen)
-![Offline](https://img.shields.io/badge/100%25-offline-orange)
+![Offline](https://img.shields.io/badge/desktop%20builds-100%25%20offline-orange)
 ![Downloads](https://img.shields.io/github/downloads/rahmatillokh/typing-me/total?label=downloads&color=gold)
 
 |  |  |
@@ -65,9 +67,16 @@ new journey.
 
 ---
 
-## ⬇️ Download & install
+## ⬇️ Play or download
 
-Grab the latest build from **[Releases](../../releases/latest)**.
+### 🕹 In your browser — nothing to install
+
+**[rahmatillokh.github.io/typing-me](https://rahmatillokh.github.io/typing-me/)** — the full game
+running on WebGL. Works in current Chrome, Edge, Firefox and Safari on a desktop or laptop (it
+needs a physical keyboard). Progress is saved in the browser. The one thing the web build skips is
+the intro clip; the desktop builds below are otherwise identical and run fully offline.
+
+Grab the desktop builds from **[Releases](../../releases/latest)**.
 
 ### Windows (10/11, 64-bit)
 
@@ -129,13 +138,16 @@ the boss's badge) deal and score ×1.5. Three missed words end the run — a mis
 
 ## 🛠 Building from source
 
-You need **Unity 6000.5.8f1** with macOS and/or Windows (Mono) build support.
+You need **Unity 6000.5.8f1** with the build support you want: macOS, Windows (Mono) and/or WebGL.
 
 ```text
 1. Clone the repo and open the folder in Unity Hub.
 2. Menu: Typing Me → Rebuild Project Assets   (regenerates every scene, prefab and asset from code)
-3. Menu: Typing Me → Build → macOS / Windows x64
+3. Menu: Typing Me → Build → macOS / Windows x64 / WebGL
 ```
+
+The WebGL build is a static folder — host it anywhere, or publish it to GitHub Pages with
+`docs/tools/deploy-webgl.sh`.
 
 Everything except the boss art is generated from code, validated by `Typing Me → Validate Generated
 Assets`, and covered by **46 tests** (EditMode + PlayMode). The full developer guide — architecture,

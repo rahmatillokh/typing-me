@@ -4,6 +4,7 @@
 /[Oo]bj/
 /[Bb]uild/
 /[Bb]uilds/
+/[Bb]uilds.noindex/
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 /[Mm]emoryCaptures/
@@ -40,6 +41,9 @@
 ## Unity3D generated crashlog
 sysinfo.txt
 mono_crash.*.json
+
+## Dropped into Resources by the performance-testing package on every player build
+/[Aa]ssets/[Rr]esources/PerformanceTestRun*
 
 ## Builds
 *.apk

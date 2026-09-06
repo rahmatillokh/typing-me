@@ -80,12 +80,21 @@ namespace TypingMe.Core
         {
             _startedAt = Time.realtimeSinceStartup;
 
+#if UNITY_WEBGL && !UNITY_EDITOR
+            // WebGL's VideoPlayer only streams from URLs — an imported VideoClip never prepares, and
+            // the deadline guard would leave the player staring at black for the full timeout.
+            // The web page's own loading screen carries the branding instead.
+            _reason = "video splash unsupported on WebGL";
+            yield return Finish();
+            yield break;
+#else
             if (player == null || player.clip == null)
             {
                 _reason = "no clip assigned";
                 yield return Finish();
                 yield break;
             }
+#endif
 
             SetUpVideo();
 
