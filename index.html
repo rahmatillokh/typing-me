@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Me — play in your browser</title>
+    <meta name="description" content="A neon typing-action game. Words rain from pixel-art bosses — type them before they hit the line. 80 levels, 4 seasons, 5 bosses. Free, no install.">
+    <meta property="og:title" content="Typing Me">
+    <meta property="og:description" content="Neon typing-action: 80 levels, 4 seasons, 5 pixel-art bosses. Play free in your browser.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://rahmatillokh.github.io/typing-me/TemplateData/preview.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/png" href="TemplateData/favicon.png">
+    <style>
+      @font-face {
+        font-family: "Orbitron";
+        src: url("TemplateData/Orbitron-Variable.ttf") format("truetype");
+        font-weight: 400 900;
+        font-display: swap;
+      }
+
+      html, body {
+        margin: 0;
+        height: 100%;
+        background: #05070c;
+        color: #e8faff;
+        font-family: "Rajdhani", "Orbitron", system-ui, sans-serif;
+        overflow: hidden;
+      }
+
+      #unity-container { position: fixed; inset: 0; }
+
+      #unity-canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: #05070c;
+        outline: none;
+      }
+
+      /* Loader — the same near-black ground and gold accent as the app icon. */
+      #loader {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 22px;
+        background:
+          radial-gradient(ellipse at 50% 110%, rgba(242, 180, 55, 0.18), transparent 60%),
+          linear-gradient(#0b0f18, #05070c);
+        transition: opacity 0.5s ease;
+        z-index: 10;
+      }
+      #loader.hidden { opacity: 0; pointer-events: none; }
+
+      #loader img { width: 128px; height: 128px; image-rendering: pixelated; }
+
+      #loader h1 {
+        margin: 0;
+        font-family: "Orbitron", system-ui, sans-serif;
+        font-weight: 800;
+        font-size: 40px;
+        letter-spacing: 0.18em;
+        color: #3bff9e;
+        text-shadow: 0 0 18px rgba(59, 255, 158, 0.55);
+      }
+
+      #bar {
+        width: min(420px, 70vw);
+        height: 6px;
+        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.12);
+        overflow: hidden;
+      }
+      #bar-fill {
+        width: 0%;
+        height: 100%;
+        background: #f2b437;
+        box-shadow: 0 0 14px rgba(242, 180, 55, 0.8);
+        transition: width 0.15s linear;
+      }
+
+      #status { font-size: 15px; letter-spacing: 0.14em; color: #7a8ca6; text-transform: uppercase; }
+
+      /* Overlays: mobile notice and load errors. */
+      .notice {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 32px;
+        text-align: center;
+        line-height: 1.6;
+        font-size: 18px;
+        background: #05070c;
+        z-index: 20;
+      }
+      .notice.visible { display: flex; }
+      .notice a { color: #f2b437; }
+
+      #fullscreen {
+        position: fixed;
+        right: 14px;
+        bottom: 14px;
+        display: none;
+        padding: 8px 14px;
+        border: 1px solid rgba(232, 250, 255, 0.25);
+        border-radius: 6px;
+        background: rgba(5, 7, 12, 0.6);
+        color: #e8faff;
+        font-size: 13px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        cursor: pointer;
+        opacity: 0.55;
+        z-index: 5;
+      }
+      #fullscreen:hover { opacity: 1; }
+      #fullscreen.visible { display: block; }
+    </style>
+  </head>
+  <body>
+    <div id="unity-container">
+      <canvas id="unity-canvas" tabindex="1"></canvas>
+    </div>
+
+    <div id="loader">
+      <img src="TemplateData/favicon.png" alt="">
+      <h1>TYPING ME</h1>
+      <div id="bar"><div id="bar-fill"></div></div>
+      <div id="status">Loading</div>
+    </div>
+
+    <div id="mobile-notice" class="notice">
+      <div>
+        <strong>Typing Me needs a physical keyboard.</strong><br>
+        Open this page on a desktop or laptop —<br>
+        or grab the Windows / macOS build on
+        <a href="https://github.com/rahmatillokh/typing-me/releases/latest">GitHub</a>.
+      </div>
+    </div>
+
+    <div id="error-notice" class="notice"></div>
+
+    <button id="fullscreen" type="button">⛶ Fullscreen</button>
+
+    <script>
+      var canvas = document.querySelector("#unity-canvas");
+      var loader = document.querySelector("#loader");
+      var barFill = document.querySelector("#bar-fill");
+      var status = document.querySelector("#status");
+
+      function showError(message) {
+        var notice = document.querySelector("#error-notice");
+        notice.innerHTML = "<div><strong>Couldn't start the game.</strong><br>" + message +
+          "<br><br>Try a current Chrome, Edge, Firefox or Safari.</div>";
+        notice.classList.add("visible");
+        loader.classList.add("hidden");
+      }
+
+      // Non-fatal engine messages go to the console; only errors get the overlay.
+      function unityShowBanner(message, type) {
+        if (type === "error") showError(message);
+        else console.warn("[Typing Me]", message);
+      }
+
+      // A typing game on a touch screen has nothing to type with — say so instead of loading 30 MB.
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) && !/Macintosh/.test(navigator.userAgent)) {
+        loader.classList.add("hidden");
+        document.querySelector("#mobile-notice").classList.add("visible");
+      } else {
+        var buildUrl = "Build";
+        var config = {
+          arguments: [],
+          dataUrl: buildUrl + "/WebGL.data.unityweb",
+          frameworkUrl: buildUrl + "/WebGL.framework.js.unityweb",
+          codeUrl: buildUrl + "/WebGL.wasm.unityweb",
+          streamingAssetsUrl: "StreamingAssets",
+          companyName: "DefaultCompany",
+          productName: "Typing Me",
+          productVersion: "1.0",
+          showBanner: unityShowBanner,
+          // Bloom at full Retina resolution is more GPU than a typing game deserves.
+          devicePixelRatio: Math.min(window.devicePixelRatio || 1, 1.5),
+          autoSyncPersistentDataPath: true,
+        };
+
+        var script = document.createElement("script");
+        script.src = buildUrl + "/WebGL.loader.js";
+        script.onload = function () {
+          createUnityInstance(canvas, config, function (progress) {
+            barFill.style.width = Math.round(progress * 100) + "%";
+            status.textContent = progress < 0.9 ? "Loading " + Math.round(progress * 100) + "%" : "Starting";
+          }).then(function (unityInstance) {
+            loader.classList.add("hidden");
+            canvas.focus();
+
+            var fullscreen = document.querySelector("#fullscreen");
+            fullscreen.classList.add("visible");
+            fullscreen.onclick = function () {
+              unityInstance.SetFullscreen(1);
+              canvas.focus();
+            };
+          }).catch(function (message) {
+            showError(String(message));
+          });
+        };
+        script.onerror = function () {
+          showError("The game files could not be downloaded.");
+        };
+        document.body.appendChild(script);
+
+        // Keystrokes must reach the game, not the page.
+        canvas.addEventListener("click", function () { canvas.focus(); });
+      }
+    </script>
+  </body>
+</html>
